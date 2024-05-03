@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        #container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        #chat-history {
+            flex: 1;
+            overflow-y: scroll;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+        #message-input-container {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+        }
+        #message-input {
+            flex: 1;
+            margin-right: 10px;
+            width: 300px;
+            height: 40px;
+        }
+        #send-button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin-top: 0;
+            cursor: pointer;
+        }
+        .message {
+            margin-bottom: 10px;
+        }
+        .sender {
+            color: blue;
+        }
+        .response {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+<div id="container">
+    <div id="chat-history"></div>
+    <div id="message-input-container">
+        <input type="text" id="message-input" placeholder="Type your message here..." onkeypress="handleKeyPress(event)">
+        <button id="send-button" onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<script>
+    function sendMessage() {
+        var messageInput = document.getElementById("message-input");
+        var message = messageInput.value;
+        if (message.trim() === "") {
+            return;
+        }
+
+        var chatHistory = document.getElementById("chat-history");
+
+        // Display user's message
+        var userMessage = document.createElement("div");
+        userMessage.classList.add("message");
+        var sender = document.createElement("span");
+        sender.classList.add("sender");
+        sender.textContent = "You: ";
+        var messageText = document.createElement("span");
+        messageText.textContent = message;
+        userMessage.appendChild(sender);
+        userMessage.appendChild(messageText);
+        chatHistory.appendChild(userMessage);
+
+        // Call server-side script and display response
+        fetch('/process', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ content: message })
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Display response
+            var responseMessage = data.result;
+            var serverResponse = document.createElement("div");
+            serverResponse.classList.add("message");
+            var responseText = document.createElement("span");
+            responseText.classList.add("response");
+            responseText.textContent = responseMessage;
+            serverResponse.appendChild(responseText);
+            chatHistory.appendChild(serverResponse);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+
+        // Clear input field
+        messageInput.value = "";
+    }
+
+    function handleKeyPress(event) {
+        if (event.key === 'Enter') {
+            sendMessage();
+        }
+    }
+</script>
+</body>
+</html>
