@@ -8,10 +8,11 @@ import promot_constant
 
 # 加载 .env 到环境变量
 from dotenv import load_dotenv, find_dotenv
+import my_db
 
 _ = load_dotenv(find_dotenv())
 
-chat = ChatOpenAI(model="gpt-3.5-turbo", temperature=0.7)
+chat = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
 prompt = ChatPromptTemplate.from_messages(
     [
         (
@@ -39,3 +40,17 @@ chain_with_message_history = RunnableWithMessageHistory(
 def multIChat(userContent):
     return chain_with_message_history.invoke(
         {"input": userContent}, {"configurable": {"session_id": "unused"}}).content
+    # 调用多轮对话链并获取响应
+    # response = chain_with_message_history.invoke(
+    #     {"input": userContent},
+    #     {"configurable": {"session_id": "unused"}}
+    # ).content
+
+    # 如果响应为空，说明prompt中没有提供信息，需要从数据库中查询
+    # if not response:
+    #     # 从数据库中查询
+    #     db_result = my_db.queryDB(userContent)  # 你需要实现query_db函数
+    #     # 将数据库查询结果添加到响应中
+    #     response = db_result
+    #
+    # return response
