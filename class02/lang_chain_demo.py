@@ -3,14 +3,17 @@ from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain.memory import ChatMessageHistory
+from langfuse.callback import CallbackHandler
 
 import promot_constant
-
-# 加载 .env 到环境变量
 from dotenv import load_dotenv, find_dotenv
-import my_db
 
 _ = load_dotenv(find_dotenv())
+
+handler = CallbackHandler(
+    trace_name="多轮对话",
+    user_id="songsir",
+)
 
 chat = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
 prompt = ChatPromptTemplate.from_messages(
@@ -38,9 +41,11 @@ chain_with_message_history = RunnableWithMessageHistory(
 
 # 多轮对话
 def multIChat(userContent):
-    return chain_with_message_history.invoke(
-        {"input": userContent}, {"configurable": {"session_id": "unused"}}).content
     # 调用多轮对话链并获取响应
+    return chain_with_message_history.invoke(
+        {"input": userContent},
+        {"configurable": {"session_id": "unused"}, "callbacks": [handler]}).content
+
     # response = chain_with_message_history.invoke(
     #     {"input": userContent},
     #     {"configurable": {"session_id": "unused"}}
