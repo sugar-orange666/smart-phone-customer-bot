@@ -68,6 +68,8 @@
     function sendMessage() {
         var messageInput = document.getElementById("message-input");
         var message = messageInput.value;
+
+        console.log(message);
         if (message.trim() === "") {
             return;
         }
